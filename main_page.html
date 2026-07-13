@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" class="scroll-smooth">
+<html lang="ko" class="scroll-smooth dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,6 +33,14 @@
             }
         }
     </script>
+    <!-- Dark Mode FOUC Prevention Script -->
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     <!-- Google Fonts (Plus Jakarta Sans for ultra-modern look) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,25 +49,62 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Confetti JS for interactive pops -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
     <style>
         body {
-            background-color: #07080a;
-            color: #f1f5f9;
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+            background-attachment: fixed;
         }
+        /* Custom Neon Ambient Glow Layers mapping background nicely */
+        .ambient-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -10;
+            pointer-events: none;
+            transition: background 0.5s ease;
+        }
+        .dark .ambient-glow {
+            background: 
+                radial-gradient(circle at 15% 20%, rgba(168, 85, 247, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 75%, rgba(6, 182, 212, 0.07) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 50%),
+                #07080a;
+        }
+        html:not(.dark) .ambient-glow {
+            background: 
+                radial-gradient(circle at 15% 20%, rgba(168, 85, 247, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 85% 75%, rgba(6, 182, 212, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(249, 115, 22, 0.03) 0%, transparent 45%),
+                #f8fafc;
+        }
+
+        /* Responsive customized scrollbars */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
         }
-        ::-webkit-scrollbar-track {
+        .dark ::-webkit-scrollbar-track {
             background: #07080a;
         }
-        ::-webkit-scrollbar-thumb {
+        html:not(.dark) ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .dark ::-webkit-scrollbar-thumb {
             background: #212631;
+            border-radius: 10px;
+        }
+        html:not(.dark) ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #a855f7;
         }
+
+        /* Typography & Custom Border Gradients */
         .text-gradient {
             background: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f97316 100%);
             -webkit-background-clip: text;
@@ -74,11 +119,19 @@
             background: linear-gradient(135deg, #a855f7, #ec4899, #f97316);
             padding: 4px;
         }
-        .glow-hover:hover {
+
+        /* Responsive Glow hover effects adjusted per theme */
+        .dark .glow-hover:hover {
             box-shadow: 0 0 30px rgba(168, 85, 247, 0.15);
             border-color: rgba(168, 85, 247, 0.4);
             transform: translateY(-4px);
         }
+        html:not(.dark) .glow-hover:hover {
+            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.08);
+            border-color: rgba(168, 85, 247, 0.25);
+            transform: translateY(-4px);
+        }
+
         @media print {
             .no-print { display: none !important; }
             body { background: white !important; color: black !important; }
@@ -86,27 +139,34 @@
         }
     </style>
 </head>
-<body class="selection:bg-purple-500 selection:text-white transition-colors duration-300">
+<body class="selection:bg-purple-500 selection:text-white transition-colors duration-300 text-slate-800 dark:text-slate-100">
+
+<!-- Fixed Ambient Background Cover -->
+<div class="ambient-glow"></div>
 
 <!-- GNB Bar -->
-<header class="no-print sticky top-0 z-50 border-b border-dark-800/80 bg-dark-950/85 backdrop-blur-md">
+<header class="no-print sticky top-0 z-50 border-b border-slate-200/80 dark:border-dark-800/80 bg-white/80 dark:bg-dark-950/85 backdrop-blur-md">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('portfolio-main-view')">
             <span class="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse"></span>
-            <span class="font-black text-base tracking-widest text-white uppercase font-mono">DANBI.DEV</span>
+            <span class="font-black text-base tracking-widest text-slate-900 dark:text-white uppercase font-mono">DANBI.DEV</span>
         </div>
         
         <!-- Navigation Menu (Clean & Stark) -->
-        <nav class="hidden md:flex items-center space-x-10 text-xs font-bold uppercase tracking-widest text-slate-400">
-            <a href="#about" onclick="navigateTo('portfolio-main-view')" class="hover:text-white transition-colors">ABOUT</a>
-            <a href="#projects" onclick="navigateTo('portfolio-main-view')" class="hover:text-white transition-colors">PROJECTS</a>
-            <a href="#achievements" onclick="navigateTo('portfolio-main-view')" class="hover:text-white transition-colors">ACHIEVEMENTS</a>
-            <a href="#experiences" onclick="navigateTo('portfolio-main-view')" class="hover:text-white transition-colors">EXPERIENCES</a>
+        <nav class="hidden md:flex items-center space-x-10 text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+            <a href="#about" onclick="navigateTo('portfolio-main-view')" class="hover:text-slate-900 dark:hover:text-white transition-colors">ABOUT</a>
+            <a href="#projects" onclick="navigateTo('portfolio-main-view')" class="hover:text-slate-900 dark:hover:text-white transition-colors">PROJECTS</a>
+            <a href="#achievements" onclick="navigateTo('portfolio-main-view')" class="hover:text-slate-900 dark:hover:text-white transition-colors">ACHIEVEMENTS</a>
+            <a href="#experiences" onclick="navigateTo('portfolio-main-view')" class="hover:text-slate-900 dark:hover:text-white transition-colors">EXPERIENCES</a>
         </nav>
 
         <!-- Dynamic Controls -->
         <div class="flex items-center space-x-3">
-            <button onclick="window.print()" class="px-4 py-2 rounded-full bg-white hover:bg-slate-200 text-dark-950 font-extrabold text-[11px] tracking-wider uppercase flex items-center gap-1.5 transition-all">
+            <!-- Theme Toggle Button -->
+            <button id="theme-toggle" class="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-dark-800 dark:hover:bg-dark-700 text-slate-700 dark:text-yellow-400 transition-all flex items-center justify-center shadow-sm" title="테마 전환">
+                <i id="theme-toggle-icon" class="fa-solid fa-moon"></i>
+            </button>
+            <button onclick="window.print()" class="px-4 py-2 rounded-full bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-dark-950 font-extrabold text-[11px] tracking-wider uppercase flex items-center gap-1.5 transition-all shadow-sm">
                 <i class="fa-solid fa-file-pdf"></i> PRINT CV
             </button>
         </div>
@@ -118,17 +178,17 @@
     <div class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <!-- Text Intro -->
         <div class="space-y-6">
-            <div class="inline-block px-3 py-1 rounded-full border border-purple-500/30 bg-purple-950/20 text-purple-400 text-xs font-mono tracking-widest uppercase">
+            <div class="inline-block px-3 py-1 rounded-full border border-purple-500/30 bg-purple-100/50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400 text-xs font-mono tracking-widest uppercase">
                 Welcome to my space
             </div>
-            <h1 class="text-5xl md:text-7xl font-black text-white leading-[0.9] tracking-tight">
+            <h1 class="text-5xl md:text-7xl font-black text-slate-900 dark:text-white leading-[0.9] tracking-tight">
                 DANBI.DEV<br>
-                <span class="text-slate-500">PORTFOLIO</span>
+                <span class="text-slate-400 dark:text-slate-500">PORTFOLIO</span>
             </h1>
-            <p class="text-slate-400 text-lg max-w-md">
+            <p class="text-slate-600 dark:text-slate-400 text-lg max-w-md">
                 I code, create value, and innovate. Explore my projects and research artifacts.
             </p>
-            <button onclick="enterPortfolio()" class="group relative px-8 py-4 bg-white text-dark-950 font-black tracking-wider uppercase rounded-full hover:bg-slate-200 transition-all active:scale-95 flex items-center gap-3">
+            <button onclick="enterPortfolio()" class="group relative px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-dark-950 font-black tracking-wider uppercase rounded-full dark:hover:bg-slate-200 transition-all active:scale-95 flex items-center gap-3 shadow-lg">
                 <span>VIEW PORTFOLIO</span>
                 <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1"></i>
             </button>
@@ -137,14 +197,14 @@
         <!-- Laptop Mockup (CSS Shape) -->
         <div class="relative w-full max-w-lg mx-auto transform hover:-rotate-2 transition-transform duration-500">
             <!-- Screen -->
-            <div class="aspect-[16/10] bg-white rounded-t-2xl border-x-8 border-t-8 border-dark-800 p-6 flex flex-col justify-center items-center shadow-2xl relative overflow-hidden">
+            <div class="aspect-[16/10] bg-slate-50 dark:bg-dark-900 rounded-t-2xl border-x-8 border-t-8 border-slate-300 dark:border-dark-800 p-6 flex flex-col justify-center items-center shadow-2xl relative overflow-hidden">
                 <div class="absolute inset-0 bg-gradient-to-br from-purple-100/20 to-pink-100/20"></div>
-                <h2 class="text-2xl font-black text-dark-900 z-10 text-center">WEB &<br>SYSTEMS</h2>
-                <div class="mt-4 w-12 h-1 bg-dark-900 rounded-full z-10"></div>
+                <h2 class="text-2xl font-black text-slate-800 dark:text-slate-100 z-10 text-center">WEB &<br>SYSTEMS</h2>
+                <div class="mt-4 w-12 h-1 bg-slate-400 dark:bg-slate-500 rounded-full z-10"></div>
             </div>
             <!-- Base -->
-            <div class="h-6 bg-dark-800 rounded-b-xl w-full"></div>
-            <div class="h-3 bg-dark-900 rounded-b-2xl w-4/5 mx-auto"></div>
+            <div class="h-6 bg-slate-400 dark:bg-dark-800 rounded-b-xl w-full"></div>
+            <div class="h-3 bg-slate-500 dark:bg-dark-900 rounded-b-2xl w-4/5 mx-auto"></div>
         </div>
     </div>
 </div>
@@ -152,16 +212,16 @@
 <!-- Main Portfolio View Container -->
 <main id="portfolio-main-view" class="max-w-6xl mx-auto px-6 sm:px-8 py-12 lg:py-20 space-y-24 sm:space-y-32">
 
-    <!-- Hero / Profile Card Section (Inspired by the centered design in the Figma screenshot) -->
+    <!-- Hero / Profile Card Section -->
     <section id="about" class="flex flex-col items-center text-center space-y-8 pt-4 scroll-mt-28">
         <!-- Circular Avatar with Gradient Ring -->
         <div class="relative group w-44 h-44 sm:w-48 sm:h-48">
             <div class="absolute inset-0 border-gradient-ring rounded-full animate-spin-slow blur-[6px] opacity-75"></div>
             <div class="absolute inset-0 border-gradient-ring rounded-full"></div>
-            <div class="w-full h-full rounded-full overflow-hidden border-4 border-dark-950 relative z-10 bg-dark-900 flex items-center justify-center">
+            <div class="w-full h-full rounded-full overflow-hidden border-4 border-slate-100 dark:border-dark-950 relative z-10 bg-slate-50 dark:bg-dark-900 flex items-center justify-center">
                 <img id="profile-img" src="./images/증명사진.JPG" alt="윤단비" class="w-full h-full object-cover block" onerror="this.style.display='none'; document.getElementById('profile-placeholder').classList.remove('hidden');">
                 <div id="profile-placeholder" class="text-center p-4 flex-col items-center justify-center hidden">
-                    <i class="fa-solid fa-user text-3xl text-slate-500"></i>
+                    <i class="fa-solid fa-user text-3xl text-slate-400 dark:text-slate-500"></i>
                 </div>
             </div>
         </div>
@@ -169,17 +229,17 @@
         <!-- Meta Identity Info -->
         <div class="space-y-4">
             <div class="flex items-center justify-center gap-2">
-                <span class="px-3 py-1 rounded-full text-[10px] font-extrabold tracking-widest bg-dark-800 text-slate-400 uppercase font-mono">
+                <span class="px-3 py-1 rounded-full text-[10px] font-extrabold tracking-widest bg-slate-200 dark:bg-dark-800 text-slate-600 dark:text-slate-400 uppercase font-mono">
                     BORN 2001
                 </span>
-                <span class="px-3 py-1 rounded-full text-[10px] font-extrabold tracking-widest bg-purple-950/50 text-purple-400 uppercase font-mono border border-purple-900/40">
+                <span class="px-3 py-1 rounded-full text-[10px] font-extrabold tracking-widest bg-purple-100 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 uppercase font-mono border border-purple-200 dark:border-purple-900/40">
                     SSAFY ACTIVE
                 </span>
             </div>
             
             <!-- Headline Title -->
-            <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-white leading-none">
-                윤단비 <span class="text-2xl sm:text-3xl font-light text-slate-500 block sm:inline sm:ml-2">Danbi Yoon</span>
+            <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-none">
+                윤단비 <span class="text-2xl sm:text-3xl font-light text-slate-400 dark:text-slate-500 block sm:inline sm:ml-2">Danbi Yoon</span>
             </h1>
 
             <div class="text-xl sm:text-2xl font-extrabold text-gradient max-w-2xl mx-auto">
@@ -188,195 +248,195 @@
         </div>
 
         <!-- SSAFY Status Card Widget -->
-        <div class="w-full max-w-md p-5 rounded-2xl bg-dark-900 border border-dark-800 flex items-center justify-between shadow-xl">
+        <div class="w-full max-w-md p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-dark-800 flex items-center justify-between shadow-xl">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-purple-900/30">S</div>
                 <div class="text-left">
-                    <h3 class="font-extrabold text-xs text-white tracking-wider font-mono">SAMSUNG SW ACADEMY</h3>
-                    <p class="text-[10px] text-slate-500 font-mono mt-0.5">2026.07.07 – PRESENT</p>
+                    <h3 class="font-extrabold text-xs text-slate-800 dark:text-white tracking-wider font-mono">SAMSUNG SW ACADEMY</h3>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 font-mono mt-0.5">2026.07.07 – PRESENT</p>
                 </div>
             </div>
-            <div class="px-3 py-1.5 rounded-lg bg-dark-950 border border-dark-800 flex items-center gap-2">
+            <div class="px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-dark-950 border border-slate-100 dark:border-dark-800 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-purple-500 animate-ping"></span>
-                <span id="ssafy-counter" class="text-xs font-black text-purple-400 font-mono">D+0일</span>
+                <span id="ssafy-counter" class="text-xs font-black text-purple-600 dark:text-purple-400 font-mono">D+0일</span>
             </div>
         </div>
     </section>
 
-    <!-- Projects Section (Strict Order: VideoSummary -> QuickQuick -> Ecosmetic Bin -> MultiPlexer) -->
+    <!-- Projects Section -->
     <section id="projects" class="space-y-8 scroll-mt-28">
-        <div class="flex items-end justify-between border-b border-dark-800 pb-4">
+        <div class="flex items-end justify-between border-b border-slate-200 dark:border-dark-800 pb-4">
             <div class="space-y-1">
                 <span class="text-[10px] font-extrabold text-orange-500 tracking-widest uppercase font-mono">CREATIONS</span>
-                <h2 class="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">PROJECTS</h2>
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">PROJECTS</h2>
             </div>
-            <span class="text-xs text-slate-500 font-mono">TOTAL 4 ARCHIVES</span>
+            <span class="text-xs text-slate-400 dark:text-slate-500 font-mono">TOTAL 4 ARCHIVES</span>
         </div>
 
         <!-- Unified Cards Grid with items-stretch for 100% matched heights -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
             
             <!-- 1. VideoSummary -->
-            <div class="print-card rounded-2xl bg-dark-900 border border-dark-800 overflow-hidden flex flex-col justify-between glow-hover transition-all duration-300">
+            <div class="print-card rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-dark-800 overflow-hidden flex flex-col justify-between glow-hover transition-all duration-300 shadow-sm">
                 <div class="p-6 sm:p-8 flex-1 flex flex-col justify-between space-y-6">
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
-                            <span class="text-[10px] font-mono font-bold text-slate-500">2025.03 – 2025.11</span>
-                            <span class="px-2.5 py-0.5 rounded text-[9px] font-extrabold bg-purple-950/80 text-purple-400 border border-purple-900/40 font-mono">AI WEB SERVICE</span>
+                            <span class="text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500">2025.03 – 2025.11</span>
+                            <span class="px-2.5 py-0.5 rounded text-[9px] font-extrabold bg-purple-50 dark:bg-purple-950/80 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-900/40 font-mono">AI WEB SERVICE</span>
                         </div>
                         <div class="space-y-2">
-                            <h3 class="text-xl font-extrabold text-white flex items-center gap-2">
+                            <h3 class="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
                                 VideoSummary
                                 <i class="fa-solid fa-play-circle text-purple-500 text-sm"></i>
                             </h3>
-                            <p class="text-xs text-slate-400 leading-relaxed">
+                            <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                                 사용자가 텍스트 스토리와 극적 하이라이트 지점 간의 가중치를 직접 세밀하게 조절하여 최적의 요약 비디오를 생성하는 지능형 웹 기반 서비스입니다.
                             </p>
                         </div>
                         <div class="flex flex-wrap gap-1.5">
-                            <span class="px-2 py-0.5 bg-dark-800 rounded text-[9px] font-mono text-slate-400">React.js</span>
-                            <span class="px-2 py-0.5 bg-dark-800 rounded text-[9px] font-mono text-slate-400">FastAPI</span>
-                            <span class="px-2 py-0.5 bg-dark-800 rounded text-[9px] font-mono text-slate-400">OpenCV</span>
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-dark-800 rounded text-[9px] font-mono text-slate-500 dark:text-slate-400">React.js</span>
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-dark-800 rounded text-[9px] font-mono text-slate-500 dark:text-slate-400">FastAPI</span>
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-dark-800 rounded text-[9px] font-mono text-slate-500 dark:text-slate-400">OpenCV</span>
                         </div>
                     </div>
                     
                     <!-- Vertical Achievements Section [Award -> Paper -> Patent] with height block to guarantee exact layout match -->
-                    <div class="pt-5 border-t border-dark-800 min-h-[120px] flex flex-col justify-start space-y-2">
+                    <div class="pt-5 border-t border-slate-100 dark:border-dark-800 min-h-[120px] flex flex-col justify-start space-y-2">
                         <div class="flex items-start gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-orange-500 mt-1.5 shrink-0"></span>
-                            <p class="text-[11px] font-bold text-orange-400">2025 추계종합학술발표회 최우수상</p>
+                            <p class="text-[11px] font-bold text-orange-600 dark:text-orange-400">2025 추계종합학술발표회 최우수상</p>
                         </div>
                         <div class="flex items-start gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-orange-500 mt-1.5 shrink-0"></span>
-                            <p class="text-[11px] font-bold text-orange-400">2025 오픈소스 개발자대회 우수작 선정</p>
+                            <p class="text-[11px] font-bold text-orange-600 dark:text-orange-400">2025 오픈소스 개발자대회 우수작 선정</p>
                         </div>
                         <div class="flex items-start gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-cyan-500 mt-1.5 shrink-0"></span>
-                            <p class="text-[11px] font-bold text-cyan-400">KCI 등재지 논문 수록</p>
+                            <p class="text-[11px] font-bold text-cyan-600 dark:text-cyan-400">KCI 등재지 논문 수록</p>
                         </div>
                     </div>
                 </div>
-                <div class="px-6 py-4 bg-dark-950 border-t border-dark-800 flex justify-end">
-                    <button onclick="navigateToProject('videosummary')" class="text-xs text-purple-400 hover:text-purple-300 font-extrabold flex items-center gap-1">DETAILS <i class="fa-solid fa-arrow-right text-[10px]"></i></button>
+                <div class="px-6 py-4 bg-slate-50 dark:bg-dark-950 border-t border-slate-150 dark:border-dark-800 flex justify-end">
+                    <button onclick="navigateToProject('videosummary')" class="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-extrabold flex items-center gap-1">DETAILS <i class="fa-solid fa-arrow-right text-[10px]"></i></button>
                 </div>
             </div>
 
             <!-- 2. Quick Quick -->
-            <div class="print-card rounded-2xl bg-dark-900 border border-dark-800 overflow-hidden flex flex-col justify-between glow-hover transition-all duration-300">
+            <div class="print-card rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-dark-800 overflow-hidden flex flex-col justify-between glow-hover transition-all duration-300 shadow-sm">
                 <div class="p-6 sm:p-8 flex-1 flex flex-col justify-between space-y-6">
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
-                            <span class="text-[10px] font-mono font-bold text-slate-500">2024.06 – 2024.11</span>
-                            <span class="px-2.5 py-0.5 rounded text-[9px] font-extrabold bg-orange-950/80 text-orange-400 border border-orange-900/40 font-mono">COLLABORATIVE AI</span>
+                            <span class="text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500">2024.06 – 2024.11</span>
+                            <span class="px-2.5 py-0.5 rounded text-[9px] font-extrabold bg-orange-50 dark:bg-orange-950/80 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-900/40 font-mono">COLLABORATIVE AI</span>
                         </div>
                         <div class="space-y-2">
-                            <h3 class="text-xl font-extrabold text-white flex items-center gap-2">
+                            <h3 class="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
                                 Quick Quick
                                 <i class="fa-solid fa-bolt text-orange-500 text-sm"></i>
                             </h3>
-                            <p class="text-xs text-slate-400 leading-relaxed">
+                            <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                                 AI 기반의 인공지능 분류 알고리즘을 도입해 복잡한 절차 없이 간결하게 아이디어를 입력하고 공유할 수 있는 웹 협업 메모 보드 솔루션입니다.
                             </p>
                         </div>
                         <div class="flex flex-wrap gap-1.5">
-                            <span class="px-2 py-0.5 bg-dark-800 rounded text-[9px] font-mono text-slate-400">JavaScript</span>
-                            <span class="px-2 py-0.5 bg-dark-800 rounded text-[9px] font-mono text-slate-400">WebSockets</span>
-                            <span class="px-2 py-0.5 bg-dark-800 rounded text-[9px] font-mono text-slate-400">Node.js</span>
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-dark-800 rounded text-[9px] font-mono text-slate-500 dark:text-slate-400">JavaScript</span>
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-dark-800 rounded text-[9px] font-mono text-slate-500 dark:text-slate-400">WebSockets</span>
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-dark-800 rounded text-[9px] font-mono text-slate-500 dark:text-slate-400">Node.js</span>
                         </div>
                     </div>
                     
                     <!-- Vertical Achievements Section [Award -> Paper -> Patent] with height block to guarantee exact layout match -->
-                    <div class="pt-5 border-t border-dark-800 min-h-[120px] flex flex-col justify-start space-y-2">
+                    <div class="pt-5 border-t border-slate-100 dark:border-dark-800 min-h-[120px] flex flex-col justify-start space-y-2">
                         <div class="flex items-start gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-orange-500 mt-1.5 shrink-0"></span>
-                            <p class="text-[11px] font-bold text-orange-400">2024 SW중심대학 연합 FESTIVAL 최우수상 (1위)</p>
+                            <p class="text-[11px] font-bold text-orange-600 dark:text-orange-400">2024 SW중심대학 연합 FESTIVAL 최우수상 (1위)</p>
                         </div>
                         <div class="flex items-start gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-cyan-500 mt-1.5 shrink-0"></span>
-                            <p class="text-[11px] font-bold text-cyan-400">KCI 등재지 논문 수록</p>
+                            <p class="text-[11px] font-bold text-cyan-600 dark:text-cyan-400">KCI 등재지 논문 수록</p>
                         </div>
                     </div>
                 </div>
-                <div class="px-6 py-4 bg-dark-950 border-t border-dark-800 flex justify-end">
-                    <button onclick="navigateToProject('quickquick')" class="text-xs text-purple-400 hover:text-purple-300 font-extrabold flex items-center gap-1">DETAILS <i class="fa-solid fa-arrow-right text-[10px]"></i></button>
+                <div class="px-6 py-4 bg-slate-50 dark:bg-dark-950 border-t border-slate-150 dark:border-dark-800 flex justify-end">
+                    <button onclick="navigateToProject('quickquick')" class="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-extrabold flex items-center gap-1">DETAILS <i class="fa-solid fa-arrow-right text-[10px]"></i></button>
                 </div>
             </div>
 
             <!-- 3. Ecosmetic Bin -->
-            <div class="print-card rounded-2xl bg-dark-900 border border-dark-800 overflow-hidden flex flex-col justify-between glow-hover transition-all duration-300">
+            <div class="print-card rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-dark-800 overflow-hidden flex flex-col justify-between glow-hover transition-all duration-300 shadow-sm">
                 <div class="p-6 sm:p-8 flex-1 flex flex-col justify-between space-y-6">
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
-                            <span class="text-[10px] font-mono font-bold text-slate-500">2024.04 – 2024.06</span>
-                            <span class="px-2.5 py-0.5 rounded text-[9px] font-extrabold bg-emerald-950/80 text-emerald-400 border border-emerald-900/40 font-mono">IOT & SOFTWARE</span>
+                            <span class="text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500">2024.04 – 2024.06</span>
+                            <span class="px-2.5 py-0.5 rounded text-[9px] font-extrabold bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/40 font-mono">IOT & SOFTWARE</span>
                         </div>
                         <div class="space-y-2">
-                            <h3 class="text-xl font-extrabold text-white flex items-center gap-2">
+                            <h3 class="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
                                 Ecosmetic Bin
                                 <i class="fa-solid fa-leaf text-emerald-500 text-sm"></i>
                             </h3>
-                            <p class="text-xs text-slate-400 leading-relaxed">
+                            <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                                 라즈베리 파이 카메라와 인공지능 컴퓨터 비전을 융합해 복잡한 화장품 공병을 판별하고 최적 분류를 수행하는 지능형 재활용 IoT 수거 솔루션입니다.
                             </p>
                         </div>
                         <div class="flex flex-wrap gap-1.5">
-                            <span class="px-2 py-0.5 bg-dark-800 rounded text-[9px] font-mono text-slate-400">Python</span>
-                            <span class="px-2 py-0.5 bg-dark-800 rounded text-[9px] font-mono text-slate-400">Raspberry Pi</span>
-                            <span class="px-2 py-0.5 bg-dark-800 rounded text-[9px] font-mono text-slate-400">OpenCV</span>
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-dark-800 rounded text-[9px] font-mono text-slate-500 dark:text-slate-400">Python</span>
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-dark-800 rounded text-[9px] font-mono text-slate-500 dark:text-slate-400">Raspberry Pi</span>
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-dark-800 rounded text-[9px] font-mono text-slate-500 dark:text-slate-400">OpenCV</span>
                         </div>
                     </div>
                     
                     <!-- Vertical Achievements Section [Award -> Paper -> Patent] with height block to guarantee exact layout match -->
-                    <div class="pt-5 border-t border-dark-800 min-h-[120px] flex flex-col justify-start space-y-2">
+                    <div class="pt-5 border-t border-slate-100 dark:border-dark-800 min-h-[120px] flex flex-col justify-start space-y-2">
                         <div class="flex items-start gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-orange-500 mt-1.5 shrink-0"></span>
-                            <p class="text-[11px] font-bold text-orange-400">2024 시스코 이노베이션 챌린지 장려상</p>
+                            <p class="text-[11px] font-bold text-orange-600 dark:text-orange-400">2024 시스코 이노베이션 챌린지 장려상</p>
                         </div>
                     </div>
                 </div>
-                <div class="px-6 py-4 bg-dark-950 border-t border-dark-800 flex justify-end">
-                    <button onclick="navigateToProject('ecosmetic')" class="text-xs text-purple-400 hover:text-purple-300 font-extrabold flex items-center gap-1">DETAILS <i class="fa-solid fa-arrow-right text-[10px]"></i></button>
+                <div class="px-6 py-4 bg-slate-50 dark:bg-dark-950 border-t border-slate-150 dark:border-dark-800 flex justify-end">
+                    <button onclick="navigateToProject('ecosmetic')" class="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-extrabold flex items-center gap-1">DETAILS <i class="fa-solid fa-arrow-right text-[10px]"></i></button>
                 </div>
             </div>
 
             <!-- 4. MultiPlexer -->
-            <div class="print-card rounded-2xl bg-dark-900 border border-dark-800 overflow-hidden flex flex-col justify-between glow-hover transition-all duration-300">
+            <div class="print-card rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-dark-800 overflow-hidden flex flex-col justify-between glow-hover transition-all duration-300 shadow-sm">
                 <div class="p-6 sm:p-8 flex-1 flex flex-col justify-between space-y-6">
                     <div class="space-y-4">
                         <div class="flex items-center justify-between">
-                            <span class="text-[10px] font-mono font-bold text-slate-500">2025.03 – 2025.10</span>
-                            <span class="px-2.5 py-0.5 rounded text-[9px] font-extrabold bg-cyan-950/80 text-cyan-400 border border-cyan-900/40 font-mono">EMBEDDED SYSTEM</span>
+                            <span class="text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500">2025.03 – 2025.10</span>
+                            <span class="px-2.5 py-0.5 rounded text-[9px] font-extrabold bg-cyan-50 dark:bg-cyan-950/80 text-cyan-600 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-900/40 font-mono">EMBEDDED SYSTEM</span>
                         </div>
                         <div class="space-y-2">
-                            <h3 class="text-xl font-extrabold text-white flex items-center gap-2">
+                            <h3 class="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
                                 MultiPlexer
                                 <i class="fa-solid fa-microchip text-cyan-500 text-sm"></i>
                             </h3>
-                            <p class="text-xs text-slate-400 leading-relaxed">
+                            <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                                 다중 발표자 스크린을 실시간 동시 전송 및 병렬 제어하여 업무 생산성을 극대화하는 저지연 임베디드 디스플레이 멀티 공유 공유기 시스템입니다.
                             </p>
                         </div>
                         <div class="flex flex-wrap gap-1.5">
-                            <span class="px-2 py-0.5 bg-dark-800 rounded text-[9px] font-mono text-slate-400">C/C++</span>
-                            <span class="px-2 py-0.5 bg-dark-800 rounded text-[9px] font-mono text-slate-400">Socket Prog</span>
-                            <span class="px-2 py-0.5 bg-dark-800 rounded text-[9px] font-mono text-slate-400">Embedded Linux</span>
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-dark-800 rounded text-[9px] font-mono text-slate-500 dark:text-slate-400">C/C++</span>
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-dark-800 rounded text-[9px] font-mono text-slate-500 dark:text-slate-400">Socket Prog</span>
+                            <span class="px-2 py-0.5 bg-slate-100 dark:bg-dark-800 rounded text-[9px] font-mono text-slate-500 dark:text-slate-400">Embedded Linux</span>
                         </div>
                     </div>
                     
                     <!-- Vertical Achievements Section [Award -> Paper -> Patent] with height block to guarantee exact layout match -->
-                    <div class="pt-5 border-t border-dark-800 min-h-[120px] flex flex-col justify-start space-y-2">
+                    <div class="pt-5 border-t border-slate-100 dark:border-dark-800 min-h-[120px] flex flex-col justify-start space-y-2">
                         <div class="flex items-start gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-cyan-500 mt-1.5 shrink-0"></span>
-                            <p class="text-[11px] font-bold text-cyan-400">KCI 등재지 논문 수록</p>
+                            <p class="text-[11px] font-bold text-cyan-600 dark:text-cyan-400">KCI 등재지 논문 수록</p>
                         </div>
                         <div class="flex items-start gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 shrink-0"></span>
-                            <p class="text-[11px] font-bold text-purple-400">특허 출원 완료 (로컬 네트워크 기반 화면 공유)</p>
+                            <p class="text-[11px] font-bold text-purple-600 dark:text-purple-400">특허 출원 완료 (로컬 네트워크 기반 화면 공유)</p>
                         </div>
                     </div>
                 </div>
-                <div class="px-6 py-4 bg-dark-950 border-t border-dark-800 flex justify-end">
-                    <button onclick="navigateToProject('multiplexer')" class="text-xs text-purple-400 hover:text-purple-300 font-extrabold flex items-center gap-1">DETAILS <i class="fa-solid fa-arrow-right text-[10px]"></i></button>
+                <div class="px-6 py-4 bg-slate-50 dark:bg-dark-950 border-t border-slate-150 dark:border-dark-800 flex justify-end">
+                    <button onclick="navigateToProject('multiplexer')" class="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-extrabold flex items-center gap-1">DETAILS <i class="fa-solid fa-arrow-right text-[10px]"></i></button>
                 </div>
             </div>
 
@@ -385,20 +445,20 @@
 
     <!-- Achievements Hub -->
     <section id="achievements" class="space-y-8 scroll-mt-28">
-        <div class="border-b border-dark-800 pb-4">
+        <div class="border-b border-slate-200 dark:border-dark-800 pb-4">
             <span class="text-[10px] font-extrabold text-purple-500 tracking-widest uppercase font-mono">AWARDS & RESEARCH</span>
-            <h2 class="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">ACHIEVEMENTS</h2>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">ACHIEVEMENTS</h2>
         </div>
 
         <!-- Dynamic Dark Tab Controls -->
-        <div class="no-print flex flex-wrap gap-2 bg-dark-900 p-1.5 rounded-xl border border-dark-800">
-            <button onclick="switchAchievementTab('external')" id="tab-external" class="tab-btn flex-1 py-3 rounded-lg text-[11px] font-extrabold tracking-wider uppercase transition-all text-white bg-dark-800 border border-dark-700/60 shadow-md flex items-center justify-center gap-2">
+        <div class="no-print flex flex-wrap gap-2 bg-slate-100 dark:bg-dark-900 p-1.5 rounded-xl border border-slate-200 dark:border-dark-800">
+            <button onclick="switchAchievementTab('external')" id="tab-external" class="tab-btn active-tab flex-1 py-3 rounded-lg text-[11px] font-extrabold tracking-wider uppercase transition-all text-slate-800 bg-white border border-slate-300/80 shadow-sm dark:text-white dark:bg-dark-800 dark:border-dark-700/60 dark:shadow-md flex items-center justify-center gap-2">
                 <i class="fa-solid fa-trophy text-orange-500"></i> EXTERNAL
             </button>
-            <button onclick="switchAchievementTab('university')" id="tab-university" class="tab-btn flex-1 py-3 rounded-lg text-[11px] font-extrabold tracking-wider uppercase transition-all text-slate-400 hover:text-white flex items-center justify-center gap-2">
+            <button onclick="switchAchievementTab('university')" id="tab-university" class="tab-btn flex-1 py-3 rounded-lg text-[11px] font-extrabold tracking-wider uppercase transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white flex items-center justify-center gap-2">
                 <i class="fa-solid fa-award"></i> UNIVERSITY
             </button>
-            <button onclick="switchAchievementTab('publications')" id="tab-publications" class="tab-btn flex-1 py-3 rounded-lg text-[11px] font-extrabold tracking-wider uppercase transition-all text-slate-400 hover:text-white flex items-center justify-center gap-2">
+            <button onclick="switchAchievementTab('publications')" id="tab-publications" class="tab-btn flex-1 py-3 rounded-lg text-[11px] font-extrabold tracking-wider uppercase transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white flex items-center justify-center gap-2">
                 <i class="fa-solid fa-file-invoice"></i> RESEARCH & PATENT
             </button>
         </div>
@@ -407,47 +467,47 @@
         <div id="content-external" class="achievement-panel space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
-                <div class="print-card p-5 bg-dark-900 rounded-xl border border-dark-800 flex items-start gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-purple-950/50 text-purple-400 border border-purple-900/30 flex items-center justify-center shrink-0">
+                <div class="print-card p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 shadow-sm flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30 flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-trophy text-lg"></i>
                     </div>
                     <div>
-                        <span class="text-[9px] font-mono text-slate-500 font-semibold block">2024.11.27</span>
-                        <h4 class="font-extrabold text-sm text-white mt-1 leading-tight">2024 SW중심대학 연합 SW FESTIVAL</h4>
-                        <p class="text-xs text-slate-400 mt-1 font-semibold">웹&모바일 부문 1위 최우수상</p>
+                        <span class="text-[9px] font-mono text-slate-400 dark:text-slate-500 font-semibold block">2024.11.27</span>
+                        <h4 class="font-extrabold text-sm text-slate-900 dark:text-white mt-1 leading-tight">2024 SW중심대학 연합 SW FESTIVAL</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 font-semibold">웹&모바일 부문 1위 최우수상</p>
                     </div>
                 </div>
 
-                <div class="print-card p-5 bg-dark-900 rounded-xl border border-dark-800 flex items-start gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-purple-950/50 text-purple-400 border border-purple-900/30 flex items-center justify-center shrink-0">
+                <div class="print-card p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 shadow-sm flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30 flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-trophy text-lg"></i>
                     </div>
                     <div>
-                        <span class="text-[9px] font-mono text-slate-500 font-semibold block">2025.11.20</span>
-                        <h4 class="font-extrabold text-sm text-white mt-1 leading-tight">2025 추계종합학술발표회</h4>
-                        <p class="text-xs text-slate-400 mt-1 font-semibold">캡스톤디자인 경진대회 최우수상</p>
+                        <span class="text-[9px] font-mono text-slate-400 dark:text-slate-500 font-semibold block">2025.11.20</span>
+                        <h4 class="font-extrabold text-sm text-slate-900 dark:text-white mt-1 leading-tight">2025 추계종합학술발표회</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 font-semibold">캡스톤디자인 경진대회 최우수상</p>
                     </div>
                 </div>
 
-                <div class="print-card p-5 bg-dark-900 rounded-xl border border-dark-800 flex items-start gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-purple-950/50 text-purple-400 border border-purple-900/30 flex items-center justify-center shrink-0">
+                <div class="print-card p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 shadow-sm flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30 flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-medal text-lg"></i>
                     </div>
                     <div>
-                        <span class="text-[9px] font-mono text-slate-500 font-semibold block">2025.11.04</span>
-                        <h4 class="font-extrabold text-sm text-white mt-1 leading-tight">2025 오픈소스 개발자대회</h4>
-                        <p class="text-xs text-slate-400 mt-1 font-semibold">우수작 선정</p>
+                        <span class="text-[9px] font-mono text-slate-400 dark:text-slate-500 font-semibold block">2025.11.04</span>
+                        <h4 class="font-extrabold text-sm text-slate-900 dark:text-white mt-1 leading-tight">2025 오픈소스 개발자대회</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 font-semibold">우수작 선정</p>
                     </div>
                 </div>
 
-                <div class="print-card p-5 bg-dark-900 rounded-xl border border-dark-800 flex items-start gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-purple-950/50 text-purple-400 border border-purple-900/30 flex items-center justify-center shrink-0">
+                <div class="print-card p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 shadow-sm flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30 flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-ribbon text-lg"></i>
                     </div>
                     <div>
-                        <span class="text-[9px] font-mono text-slate-500 font-semibold block">2024.04.30</span>
-                        <h4 class="font-extrabold text-sm text-white mt-1 leading-tight">2024 시스코 이노베이션 챌린지</h4>
-                        <p class="text-xs text-slate-400 mt-1 font-semibold">장려상 수상</p>
+                        <span class="text-[9px] font-mono text-slate-400 dark:text-slate-500 font-semibold block">2024.04.30</span>
+                        <h4 class="font-extrabold text-sm text-slate-900 dark:text-white mt-1 leading-tight">2024 시스코 이노베이션 챌린지</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 font-semibold">장려상 수상</p>
                     </div>
                 </div>
 
@@ -458,69 +518,69 @@
         <div id="content-university" class="achievement-panel space-y-4 hidden">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                <div class="print-card p-5 bg-dark-900 rounded-xl border border-dark-800 flex items-start gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-dark-800 text-slate-400 flex items-center justify-center shrink-0">
+                <div class="print-card p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 shadow-sm flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-dark-800 text-slate-500 dark:text-slate-400 flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-award text-lg"></i>
                     </div>
                     <div>
-                        <span class="text-[9px] font-mono text-slate-500 font-semibold block">2025.05.30</span>
-                        <h4 class="font-extrabold text-sm text-white mt-1 leading-tight">컴퓨터공학부 캡스톤디자인 작품발표회</h4>
-                        <p class="text-xs text-slate-400 mt-1 font-semibold">웹 부문 1위 최우수상</p>
+                        <span class="text-[9px] font-mono text-slate-400 dark:text-slate-500 font-semibold block">2025.05.30</span>
+                        <h4 class="font-extrabold text-sm text-slate-900 dark:text-white mt-1 leading-tight">컴퓨터공학부 캡스톤디자인 작품발표회</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 font-semibold">웹 부문 1위 최우수상</p>
                     </div>
                 </div>
 
-                <div class="print-card p-5 bg-dark-900 rounded-xl border border-dark-800 flex items-start gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-dark-800 text-slate-400 flex items-center justify-center shrink-0">
+                <div class="print-card p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 shadow-sm flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-dark-800 text-slate-500 dark:text-slate-400 flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-award text-lg"></i>
                     </div>
                     <div>
-                        <span class="text-[9px] font-mono text-slate-500 font-semibold block">2025.02.07</span>
-                        <h4 class="font-extrabold text-sm text-white mt-1 leading-tight">제 11회 창의융합역량 경진대회</h4>
-                        <p class="text-xs text-slate-400 mt-1 font-semibold">금상 수상</p>
+                        <span class="text-[9px] font-mono text-slate-400 dark:text-slate-500 font-semibold block">2025.02.07</span>
+                        <h4 class="font-extrabold text-sm text-slate-900 dark:text-white mt-1 leading-tight">제 11회 창의융합역량 경진대회</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 font-semibold">금상 수상</p>
                     </div>
                 </div>
 
-                <div class="print-card p-5 bg-dark-900 rounded-xl border border-dark-800 flex items-start gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-dark-800 text-slate-400 flex items-center justify-center shrink-0">
+                <div class="print-card p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 shadow-sm flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-dark-800 text-slate-500 dark:text-slate-400 flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-award text-lg"></i>
                     </div>
                     <div>
-                        <span class="text-[9px] font-mono text-slate-500 font-semibold block">2025.05.26</span>
-                        <h4 class="font-extrabold text-sm text-white mt-1 leading-tight">2025 한성대학교 한성발전공헌상</h4>
-                        <p class="text-xs text-slate-400 mt-1 font-semibold">교내 공헌 우수 시상</p>
+                        <span class="text-[9px] font-mono text-slate-400 dark:text-slate-500 font-semibold block">2025.05.26</span>
+                        <h4 class="font-extrabold text-sm text-slate-900 dark:text-white mt-1 leading-tight">2025 한성대학교 한성발전공헌상</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 font-semibold">교내 공헌 우수 시상</p>
                     </div>
                 </div>
 
-                <div class="print-card p-5 bg-dark-900 rounded-xl border border-dark-800 flex items-start gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-dark-800 text-slate-400 flex items-center justify-center shrink-0">
+                <div class="print-card p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 shadow-sm flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-dark-800 text-slate-500 dark:text-slate-400 flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-award text-lg"></i>
                     </div>
                     <div>
-                        <span class="text-[9px] font-mono text-slate-500 font-semibold block">2025.08.13</span>
-                        <h4 class="font-extrabold text-sm text-white mt-1 leading-tight">제 12회 창의융합역량 경진대회</h4>
-                        <p class="text-xs text-slate-400 mt-1 font-semibold">은상 수상</p>
+                        <span class="text-[9px] font-mono text-slate-400 dark:text-slate-500 font-semibold block">2025.08.13</span>
+                        <h4 class="font-extrabold text-sm text-slate-900 dark:text-white mt-1 leading-tight">제 12회 창의융합역량 경진대회</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 font-semibold">은상 수상</p>
                     </div>
                 </div>
 
-                <div class="print-card p-5 bg-dark-900 rounded-xl border border-dark-800 flex items-start gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-dark-800 text-slate-400 flex items-center justify-center shrink-0">
+                <div class="print-card p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 shadow-sm flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-dark-800 text-slate-500 dark:text-slate-400 flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-award text-lg"></i>
                     </div>
                     <div>
-                        <span class="text-[9px] font-mono text-slate-500 font-semibold block">2025.09.26</span>
-                        <h4 class="font-extrabold text-sm text-white mt-1 leading-tight">제 21회 한성공학경진대회</h4>
-                        <p class="text-xs text-slate-400 mt-1 font-semibold">은상 수상</p>
+                        <span class="text-[9px] font-mono text-slate-400 dark:text-slate-500 font-semibold block">2025.09.26</span>
+                        <h4 class="font-extrabold text-sm text-slate-900 dark:text-white mt-1 leading-tight">제 21회 한성공학경진대회</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 font-semibold">은상 수상</p>
                     </div>
                 </div>
 
-                <div class="print-card p-5 bg-dark-900 rounded-xl border border-dark-800 flex items-start gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-dark-800 text-slate-400 flex items-center justify-center shrink-0">
+                <div class="print-card p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 shadow-sm flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-dark-800 text-slate-500 dark:text-slate-400 flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-award text-lg"></i>
                     </div>
                     <div>
-                        <span class="text-[9px] font-mono text-slate-500 font-semibold block">2024.09.26</span>
-                        <h4 class="font-extrabold text-sm text-white mt-1 leading-tight">제 20회 한성공학경진대회</h4>
-                        <p class="text-xs text-slate-400 mt-1 font-semibold">은상 수상</p>
+                        <span class="text-[9px] font-mono text-slate-400 dark:text-slate-500 font-semibold block">2024.09.26</span>
+                        <h4 class="font-extrabold text-sm text-slate-900 dark:text-white mt-1 leading-tight">제 20회 한성공학경진대회</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-1 font-semibold">은상 수상</p>
                     </div>
                 </div>
 
@@ -530,62 +590,62 @@
         <!-- 3. Research Publications & Patents -->
         <div id="content-publications" class="achievement-panel space-y-6 hidden">
             <!-- Patent Card -->
-            <div class="p-6 bg-dark-900 rounded-xl border border-dark-800 space-y-4">
-                <span class="text-[10px] font-mono text-purple-400 font-bold uppercase tracking-widest block">PATENT / 특허 출원</span>
+            <div class="p-6 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 shadow-sm space-y-4">
+                <span class="text-[10px] font-mono text-purple-600 dark:text-purple-400 font-bold uppercase tracking-widest block">PATENT / 특허 출원</span>
                 <div class="flex items-start gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-purple-950/50 border border-purple-900/30 text-purple-400 flex items-center justify-center shrink-0">
+                    <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/50 border border-purple-100 dark:border-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-fingerprint text-lg"></i>
                     </div>
                     <div>
-                        <span class="text-[9px] font-mono text-slate-500 block">2025.12.31 출원</span>
-                        <h4 class="font-extrabold text-sm text-white mt-1 leading-tight">로컬 네트워크 기반의 화면 공유 장치 및 방법</h4>
-                        <p class="text-xs text-slate-400 mt-1">지연 최소화를 구현하는 임베디드 다중 디스플레이 중계 알고리즘</p>
+                        <span class="text-[9px] font-mono text-slate-400 dark:text-slate-500 block">2025.12.31 출원</span>
+                        <h4 class="font-extrabold text-sm text-slate-900 dark:text-white mt-1 leading-tight">로컬 네트워크 기반의 화면 공유 장치 및 방법</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">지연 최소화를 구현하는 임베디드 다중 디스플레이 중계 알고리즘</p>
                     </div>
                 </div>
             </div>
 
             <!-- Publications -->
             <div class="space-y-3">
-                <span class="text-[10px] font-mono text-purple-400 font-bold uppercase tracking-widest block">KCI PUBLICATIONS (등재 논문 4편)</span>
+                <span class="text-[10px] font-mono text-purple-600 dark:text-purple-400 font-bold uppercase tracking-widest block">KCI PUBLICATIONS (등재 논문 4편)</span>
                 <div class="grid grid-cols-1 gap-3">
                     
-                    <div class="p-4 bg-dark-900 rounded-xl border border-dark-800 hover:border-purple-500/50 flex items-center justify-between gap-4 transition-all">
+                    <div class="p-4 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 hover:border-purple-400 dark:hover:border-purple-500/50 flex items-center justify-between gap-4 transition-all shadow-sm">
                         <div class="space-y-1">
                             <div class="flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-900/30 text-[9px] font-mono font-bold">KCI 등재</span>
-                                <h4 class="font-bold text-xs sm:text-sm text-white">[논문1] AI를 활용한 간결한 메모와 공유 시스템: QuickQuick</h4>
+                                <span class="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 text-[9px] font-mono font-bold">KCI 등재</span>
+                                <h4 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">[논문1] AI를 활용한 간결한 메모와 공유 시스템: QuickQuick</h4>
                             </div>
-                            <p class="text-[10px] text-slate-500 font-mono">발행년도: 2024년 ⭐</p>
+                            <p class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">발행년도: 2024년 ⭐</p>
                         </div>
                     </div>
 
-                    <div class="p-4 bg-dark-900 rounded-xl border border-dark-800 hover:border-purple-500/50 flex items-center justify-between gap-4 transition-all">
+                    <div class="p-4 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 hover:border-purple-400 dark:hover:border-purple-500/50 flex items-center justify-between gap-4 transition-all shadow-sm">
                         <div class="space-y-1">
                             <div class="flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-900/30 text-[9px] font-mono font-bold">KCI 등재</span>
-                                <h4 class="font-bold text-xs sm:text-sm text-white">[논문2] 컴퓨터 스크린 실시간 전송에 대한 실험적 성능 평가</h4>
+                                <span class="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 text-[9px] font-mono font-bold">KCI 등재</span>
+                                <h4 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">[논문2] 컴퓨터 스크린 실시간 전송에 대한 실험적 성능 평가</h4>
                             </div>
-                            <p class="text-[10px] text-slate-500 font-mono">발행년도: 2025년</p>
+                            <p class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">발행년도: 2025년</p>
                         </div>
                     </div>
 
-                    <div class="p-4 bg-dark-900 rounded-xl border border-dark-800 hover:border-purple-500/50 flex items-center justify-between gap-4 transition-all">
+                    <div class="p-4 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 hover:border-purple-400 dark:hover:border-purple-500/50 flex items-center justify-between gap-4 transition-all shadow-sm">
                         <div class="space-y-1">
                             <div class="flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-900/30 text-[9px] font-mono font-bold">KCI 등재</span>
-                                <h4 class="font-bold text-xs sm:text-sm text-white">[논문3] Video summarization with adjustable ratio of highlights and story</h4>
+                                <span class="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 text-[9px] font-mono font-bold">KCI 등재</span>
+                                <h4 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">[논문3] Video summarization with adjustable ratio of highlights and story</h4>
                             </div>
-                            <p class="text-[10px] text-slate-500 font-mono">발행년도: 2025년</p>
+                            <p class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">발행년도: 2025년</p>
                         </div>
                     </div>
 
-                    <div class="p-4 bg-dark-900 rounded-xl border border-dark-800 hover:border-purple-500/50 flex items-center justify-between gap-4 transition-all">
+                    <div class="p-4 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 hover:border-purple-400 dark:hover:border-purple-500/50 flex items-center justify-between gap-4 transition-all shadow-sm">
                         <div class="space-y-1">
                             <div class="flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-900/30 text-[9px] font-mono font-bold">KCI 등재</span>
-                                <h4 class="font-bold text-xs sm:text-sm text-white">[논문4] Design and Implementation of Multiplexer System for Display Sharing of Multiple Presenters on Meeting</h4>
+                                <span class="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 text-[9px] font-mono font-bold">KCI 등재</span>
+                                <h4 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">[논문4] Design and Implementation of Multiplexer System for Display Sharing of Multiple Presenters on Meeting</h4>
                             </div>
-                            <p class="text-[10px] text-slate-500 font-mono">발행년도: 2025년</p>
+                            <p class="text-[10px] text-slate-400 dark:text-slate-500 font-mono">발행년도: 2025년</p>
                         </div>
                     </div>
 
@@ -596,91 +656,91 @@
 
     <!-- Other Experiences -->
     <section id="experiences" class="space-y-8 scroll-mt-28">
-        <div class="border-b border-dark-800 pb-4">
+        <div class="border-b border-slate-200 dark:border-dark-800 pb-4">
             <span class="text-[10px] font-extrabold text-purple-500 tracking-widest uppercase font-mono">CHRONOLOGY</span>
-            <h2 class="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">EXPERIENCES</h2>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">EXPERIENCES</h2>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
             <!-- Academic Tutors (Left 6 Cols) -->
             <div class="lg:col-span-6 space-y-6">
-                <h3 class="text-sm font-extrabold text-white tracking-wider flex items-center gap-2 uppercase">
+                <h3 class="text-sm font-extrabold text-slate-900 dark:text-white tracking-wider flex items-center gap-2 uppercase">
                     <span class="w-2 h-2 rounded-full bg-purple-500"></span> ACADEMIC ASSISTANCE
                 </h3>
 
                 <div class="space-y-3">
-                    <div class="p-5 bg-dark-900 rounded-xl border border-dark-800 flex justify-between gap-4">
+                    <div class="p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 flex justify-between gap-4 shadow-sm">
                         <div class="space-y-1">
-                            <h4 class="font-bold text-xs sm:text-sm text-white">컴퓨터공학부 전공 기초 과목 TA 조교</h4>
+                            <h4 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">컴퓨터공학부 전공 기초 과목 TA 조교</h4>
                             <p class="text-xs text-slate-500">학부생 전공 실습 및 전반 전공 이론 설계 지원</p>
                         </div>
-                        <span class="text-[10px] font-mono font-bold text-purple-400 shrink-0 text-right leading-relaxed">2024 2학기<br>2025 1, 2학기</span>
+                        <span class="text-[10px] font-mono font-bold text-purple-600 dark:text-purple-400 shrink-0 text-right leading-relaxed">2024 2학기<br>2025 1, 2학기</span>
                     </div>
 
-                    <div class="p-5 bg-dark-900 rounded-xl border border-dark-800 flex justify-between gap-4">
+                    <div class="p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 flex justify-between gap-4 shadow-sm">
                         <div class="space-y-1">
-                            <h4 class="font-bold text-xs sm:text-sm text-white">런던 글로벌 창업교육 프로그램</h4>
+                            <h4 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">런던 글로벌 창업교육 프로그램</h4>
                             <p class="text-xs text-slate-500">우수 참여 우수성 3위 달성 및 글로벌 리더십 배양</p>
                         </div>
-                        <span class="text-[10px] font-mono font-bold text-purple-400 shrink-0 text-right">2026.01.07 –<br>2026.01.20</span>
+                        <span class="text-[10px] font-mono font-bold text-purple-600 dark:text-purple-400 shrink-0 text-right">2026.01.07 –<br>2026.01.20</span>
                     </div>
 
-                    <div class="p-5 bg-dark-900 rounded-xl border border-dark-800 flex justify-between gap-4">
+                    <div class="p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 flex justify-between gap-4 shadow-sm">
                         <div class="space-y-1">
-                            <h4 class="font-bold text-xs sm:text-sm text-white">컴퓨터공학부 코딩라운지 튜터</h4>
+                            <h4 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">컴퓨터공학부 코딩라운지 튜터</h4>
                             <p class="text-xs text-slate-500">비전공 및 저학년 대상 기초 프로그래밍 가이드 설계</p>
                         </div>
-                        <span class="text-[10px] font-mono font-bold text-purple-400 shrink-0 text-right">2025 1학기</span>
+                        <span class="text-[10px] font-mono font-bold text-purple-600 dark:text-purple-400 shrink-0 text-right">2025 1학기</span>
                     </div>
 
-                    <div class="p-5 bg-dark-900 rounded-xl border border-dark-800 flex justify-between gap-4">
+                    <div class="p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 flex justify-between gap-4 shadow-sm">
                         <div class="space-y-1">
-                            <h4 class="font-bold text-xs sm:text-sm text-white">동계 프로그래밍 캠프 튜터</h4>
+                            <h4 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">동계 프로그래밍 캠프 튜터</h4>
                             <p class="text-xs text-slate-500">한성대학교 대학생 대상 심화 전공 트랙 코칭</p>
                         </div>
-                        <span class="text-[10px] font-mono font-bold text-purple-400 shrink-0 text-right">2025.01.20 –<br>2025.01.24</span>
+                        <span class="text-[10px] font-mono font-bold text-purple-600 dark:text-purple-400 shrink-0 text-right">2025.01.20 –<br>2025.01.24</span>
                     </div>
                 </div>
             </div>
 
             <!-- Creator & Literacy (Right 6 Cols) -->
             <div class="lg:col-span-6 space-y-6">
-                <h3 class="text-sm font-extrabold text-white tracking-wider flex items-center gap-2 uppercase">
+                <h3 class="text-sm font-extrabold text-slate-900 dark:text-white tracking-wider flex items-center gap-2 uppercase">
                     <span class="w-2 h-2 rounded-full bg-pink-500"></span> MEDIA & LITERACY
                 </h3>
 
                 <div class="space-y-3">
-                    <div class="p-5 bg-dark-900 rounded-xl border border-dark-800 flex justify-between gap-4">
+                    <div class="p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 flex justify-between gap-4 shadow-sm">
                         <div class="space-y-1">
-                            <h4 class="font-bold text-xs sm:text-sm text-white">한성인 서평 베스트리뷰 선정</h4>
+                            <h4 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">한성인 서평 베스트리뷰 선정</h4>
                             <p class="text-xs text-slate-500">한성대학교 학술정보관 3개 학기 연속 우수 리뷰 서평 선정</p>
                         </div>
-                        <span class="text-[10px] font-mono font-bold text-pink-400 shrink-0 text-right leading-relaxed">2022 2학기<br>2023, 2024 2학기</span>
+                        <span class="text-[10px] font-mono font-bold text-pink-600 dark:text-pink-400 shrink-0 text-right leading-relaxed">2022 2학기<br>2023, 2024 2학기</span>
                     </div>
 
-                    <div class="p-5 bg-dark-900 rounded-xl border border-dark-800 flex justify-between gap-4">
+                    <div class="p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 flex justify-between gap-4 shadow-sm">
                         <div class="space-y-1">
-                            <h4 class="font-bold text-xs sm:text-sm text-white">신입생 오리엔테이션 온라인 영상 제작</h4>
+                            <h4 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">신입생 오리엔테이션 온라인 영상 제작</h4>
                             <p class="text-xs text-slate-500">학내 트랙 맞춤 교육 비디오 최우수 가이드 제작 선정</p>
                         </div>
-                        <span class="text-[10px] font-mono font-bold text-pink-400 shrink-0 text-right">2025 1학기</span>
+                        <span class="text-[10px] font-mono font-bold text-pink-600 dark:text-pink-400 shrink-0 text-right">2025 1학기</span>
                     </div>
 
-                    <div class="p-5 bg-dark-900 rounded-xl border border-dark-800 flex justify-between gap-4">
+                    <div class="p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 flex justify-between gap-4 shadow-sm">
                         <div class="space-y-1">
-                            <h4 class="font-bold text-xs sm:text-sm text-white">학술정보관 주최 독서 발표대회</h4>
+                            <h4 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">학술정보관 주최 독서 발표대회</h4>
                             <p class="text-xs text-slate-500">융복합적 독서 토론 및 프레젠테이션 스피치 최우수상</p>
                         </div>
-                        <span class="text-[10px] font-mono font-bold text-pink-400 shrink-0 text-right">2025.01.15</span>
+                        <span class="text-[10px] font-mono font-bold text-pink-600 dark:text-pink-400 shrink-0 text-right">2025.01.15</span>
                     </div>
 
-                    <div class="p-5 bg-dark-900 rounded-xl border border-dark-800 flex justify-between gap-4">
+                    <div class="p-5 bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 flex justify-between gap-4 shadow-sm">
                         <div class="space-y-1">
-                            <h4 class="font-bold text-xs sm:text-sm text-white">동계 프로그래밍 캠프 소개 Vlog 및 홍보</h4>
+                            <h4 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">동계 프로그래밍 캠프 소개 Vlog 및 홍보</h4>
                             <p class="text-xs text-slate-500">동계 캠프 트랙 인지도 확장을 위한 미디어 가이드 제작</p>
                         </div>
-                        <span class="text-[10px] font-mono font-bold text-pink-400 shrink-0 text-right">2025 1학기</span>
+                        <span class="text-[10px] font-mono font-bold text-pink-600 dark:text-pink-400 shrink-0 text-right">2025 1학기</span>
                     </div>
                 </div>
             </div>
@@ -693,25 +753,25 @@
 <!-- Projects Detail SPA View (Fully Mapped to User's Actual GitHub READMEs) -->
 <main id="project-detail-view" class="hidden max-w-4xl mx-auto px-6 py-12 lg:py-20 space-y-8">
     <!-- Back Button -->
-    <button onclick="navigateTo('portfolio-main-view')" class="group px-4 py-2 rounded-full bg-dark-900 hover:bg-dark-800 border border-dark-800 text-xs font-bold flex items-center gap-2 transition-all">
+    <button onclick="navigateTo('portfolio-main-view')" class="group px-4 py-2 rounded-full bg-white hover:bg-slate-100 dark:bg-dark-900 dark:hover:bg-dark-800 border border-slate-200 dark:border-dark-800 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2 transition-all shadow-sm">
         <i class="fa-solid fa-arrow-left group-hover:-translate-x-1 transition-transform"></i> BACK TO PORTFOLIO
     </button>
 
-    <!-- Detail Box (Glossy Dark Panel) -->
-    <div class="bg-dark-900 border border-dark-800 rounded-3xl p-6 sm:p-10 shadow-2xl space-y-8">
+    <!-- Detail Box (Glossy Panel) -->
+    <div class="bg-white dark:bg-dark-900 border border-slate-200 dark:border-dark-800 rounded-3xl p-6 sm:p-10 shadow-2xl space-y-8">
         
         <!-- Header Info -->
-        <div class="border-b border-dark-800 pb-6 space-y-4">
+        <div class="border-b border-slate-200 dark:border-dark-800 pb-6 space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-2">
-                <span id="detail-tag" class="px-3 py-1 rounded-full text-[10px] font-black uppercase font-mono tracking-widest bg-dark-800 text-purple-400"></span>
-                <span id="detail-period" class="text-xs text-slate-500 font-mono"></span>
+                <span id="detail-tag" class="px-3 py-1 rounded-full text-[10px] font-black uppercase font-mono tracking-widest bg-slate-100 dark:bg-dark-800 text-purple-600 dark:text-purple-400"></span>
+                <span id="detail-period" class="text-xs text-slate-400 dark:text-slate-500 font-mono"></span>
             </div>
-            <h2 id="detail-title" class="text-3xl sm:text-4xl font-black text-white tracking-tight"></h2>
-            <p id="detail-desc" class="text-sm sm:text-base text-slate-400 leading-relaxed"></p>
+            <h2 id="detail-title" class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight"></h2>
+            <p id="detail-desc" class="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed"></p>
         </div>
 
         <!-- Rendered Readme Structure -->
-        <div id="detail-markdown-content" class="space-y-8 text-sm sm:text-base text-slate-300 leading-relaxed">
+        <div id="detail-markdown-content" class="space-y-8 text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed">
             <!-- Dynamically populated -->
         </div>
 
@@ -719,9 +779,9 @@
 </main>
 
 <!-- Footer Copyright -->
-<footer class="border-t border-dark-900 mt-24 bg-dark-950 p-8 text-center text-xs text-slate-600 space-y-2">
+<footer class="border-t border-slate-200 dark:border-dark-950 mt-24 bg-slate-100 dark:bg-dark-950 p-8 text-center text-xs text-slate-500 dark:text-slate-600 space-y-2">
     <p>© 2026 윤단비. All rights reserved.</p>
-    <p class="font-mono">Compiled in dynamic dark mode inspired by Figma Showcase</p>
+    <p class="font-mono">Compiled with dynamic dual-theme support & elegant gradient glows</p>
 </footer>
 
 <script>
@@ -737,35 +797,35 @@
             markdown: `
                 <div class="space-y-6">
                     <div>
-                        <h3 class="text-sm font-extrabold text-white tracking-wider uppercase mb-3"><i class="fa-solid fa-circle-check text-purple-500 mr-1.5"></i> Project Intro</h3>
-                        <p class="text-slate-400">
+                        <h3 class="text-sm font-extrabold text-slate-800 dark:text-white tracking-wider uppercase mb-3"><i class="fa-solid fa-circle-check text-purple-500 mr-1.5"></i> Project Intro</h3>
+                        <p class="text-slate-600 dark:text-slate-400">
                             영상을 일괄 요약하거나 중요 프레임만을 나열하는 기존 모델들과 달리, 본 논문 및 프로젝트에서는 영상의 중요한 부분인 '하이라이트(Highlight)'와 전체적인 흐름을 이해하는 데 도움을 주는 '스토리 장면(Story-conveying Scenes)'의 비중을 조절할 수 있는 가중치 매개변수 <strong>w</strong>를 유저에게 제공합니다.
                         </p>
                     </div>
 
-                    <div class="p-5 bg-dark-950 rounded-xl border border-dark-800 space-y-3">
-                        <h4 class="text-xs font-bold text-white uppercase tracking-wider font-mono"><i class="fa-solid fa-code text-purple-400 mr-1.5"></i> System Architecture</h4>
-                        <ul class="list-disc list-inside text-xs space-y-2 text-slate-400">
-                            <li><strong class="text-white">자막 및 오디오 분석 (NLP):</strong> Whisper API를 통해 영상 자막을 세그먼트화하고 텍스트 임베딩을 구성하여 의미적 요소를 추적합니다.</li>
-                            <li><strong class="text-white">시각적 중요도 분석 (CV):</strong> 프레임별 모션 밀도와 오디오 크기를 추출하여 하이라이트 세그먼트를 감지합니다.</li>
-                            <li><strong class="text-white">결합 요약기 (Integrator):</strong> 사용자가 슬라이더로 조율한 가중치(w)에 입각하여 오디오-비주얼 에셋 큐레이션을 자동 계산하고 추출합니다.</li>
+                    <div class="p-5 bg-slate-50 dark:bg-dark-950 rounded-xl border border-slate-200 dark:border-dark-800 space-y-3">
+                        <h4 class="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider font-mono"><i class="fa-solid fa-code text-purple-600 dark:text-purple-400 mr-1.5"></i> System Architecture</h4>
+                        <ul class="list-disc list-inside text-xs space-y-2 text-slate-600 dark:text-slate-400">
+                            <li><strong class="text-slate-900 dark:text-white">자막 및 오디오 분석 (NLP):</strong> Whisper API를 통해 영상 자막을 세그먼트화하고 텍스트 임베딩을 구성하여 의미적 요소를 추적합니다.</li>
+                            <li><strong class="text-slate-900 dark:text-white">시각적 중요도 분석 (CV):</strong> 프레임별 모션 밀도와 오디오 크기를 추출하여 하이라이트 세그먼트를 감지합니다.</li>
+                            <li><strong class="text-slate-900 dark:text-white">결합 요약기 (Integrator):</strong> 사용자가 슬라이더로 조율한 가중치(w)에 입각하여 오디오-비주얼 에셋 큐레이션을 자동 계산하고 추출합니다.</li>
                         </ul>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="p-4 bg-dark-950 rounded-xl border border-dark-800 space-y-2">
-                            <span class="text-[10px] text-purple-400 font-mono uppercase block">UI/UX Features</span>
-                            <p class="text-xs text-slate-400">사용자가 0%에서 100%까지 스토리 중심 혹은 하이라이트 중심으로 영상 생성 범주를 직접 시뮬레이션할 수 있는 React 슬라이더와 실시간 비디오 렌더러.</p>
+                        <div class="p-4 bg-slate-50 dark:bg-dark-950 rounded-xl border border-slate-200 dark:border-dark-800 space-y-2">
+                            <span class="text-[10px] text-purple-600 dark:text-purple-400 font-mono uppercase block">UI/UX Features</span>
+                            <p class="text-xs text-slate-600 dark:text-slate-400">사용자가 0%에서 100%까지 스토리 중심 혹은 하이라이트 중심으로 영상 생성 범주를 직접 시뮬레이션할 수 있는 React 슬라이더와 실시간 비디오 렌더러.</p>
                         </div>
-                        <div class="p-4 bg-dark-950 rounded-xl border border-dark-800 space-y-2">
-                            <span class="text-[10px] text-purple-400 font-mono uppercase block">Performance Optimization</span>
-                            <p class="text-xs text-slate-400">FFmpeg를 기반으로 멀티스레드 병렬 자막 합성 기법을 개발하여 영상 생성의 지연 시간을 비약적으로 단축시켰습니다.</p>
+                        <div class="p-4 bg-slate-50 dark:bg-dark-950 rounded-xl border border-slate-200 dark:border-dark-800 space-y-2">
+                            <span class="text-[10px] text-purple-600 dark:text-purple-400 font-mono uppercase block">Performance Optimization</span>
+                            <p class="text-xs text-slate-600 dark:text-slate-400">FFmpeg를 기반으로 멀티스레드 병렬 자막 합성 기법을 개발하여 영상 생성의 지연 시간을 비약적으로 단축시켰습니다.</p>
                         </div>
                     </div>
 
-                    <div class="p-4 bg-purple-950/20 border border-purple-900/40 rounded-xl">
-                        <h4 class="text-xs font-bold text-purple-400 uppercase tracking-widest block mb-2"><i class="fa-solid fa-trophy mr-1.5"></i> Achievements</h4>
-                        <ul class="text-xs text-slate-400 space-y-1">
+                    <div class="p-4 bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-900/40 rounded-xl">
+                        <h4 class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest block mb-2"><i class="fa-solid fa-trophy mr-1.5"></i> Achievements</h4>
+                        <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1">
                             <li>• 2025 추계종합학술발표회 최우수상</li>
                             <li>• 2025 오픈소스 개발자대회 우수작</li>
                             <li>• KCI 등재지 논문 수록</li>
@@ -782,26 +842,26 @@
             markdown: `
                 <div class="space-y-6">
                     <div>
-                        <h3 class="text-sm font-extrabold text-white tracking-wider uppercase mb-3"><i class="fa-solid fa-circle-check text-orange-500 mr-1.5"></i> Project Overview</h3>
-                        <p class="text-slate-400">
+                        <h3 class="text-sm font-extrabold text-slate-800 dark:text-white tracking-wider uppercase mb-3"><i class="fa-solid fa-circle-check text-orange-500 mr-1.5"></i> Project Overview</h3>
+                        <p class="text-slate-600 dark:text-slate-400">
                             동시다발적으로 발산되는 팀원들의 아이디어를 한곳에 정렬하는 과정에서의 인지 과부하를 최소화하기 위한 목적에서 출발한 솔루션입니다. 사용자가 텍스트를 남기면, AI 구문 분류 알고리즘이 자동으로 맥락과 주제를 분류해 알맞은 캔버스로 실시간 정합화해 배치합니다.
                         </p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="p-5 bg-dark-950 rounded-xl border border-dark-800 space-y-2">
-                            <span class="text-[10px] text-orange-400 font-mono uppercase block">WebSocket Syncing</span>
-                            <p class="text-xs text-slate-400">NodeJS 웹소켓 모듈을 도입하여 한계 대역폭 내 동시 동기화 성능을 최대화하였으며 실시간 레이아웃 밀림 지연을 극복했습니다.</p>
+                        <div class="p-5 bg-slate-50 dark:bg-dark-950 rounded-xl border border-slate-200 dark:border-dark-800 space-y-2">
+                            <span class="text-[10px] text-orange-600 dark:text-orange-400 font-mono uppercase block">WebSocket Syncing</span>
+                            <p class="text-xs text-slate-600 dark:text-slate-400">NodeJS 웹소켓 모듈을 도입하여 한계 대역폭 내 동시 동기화 성능을 최대화하였으며 실시간 레이아웃 밀림 지연을 극복했습니다.</p>
                         </div>
-                        <div class="p-5 bg-dark-950 rounded-xl border border-dark-800 space-y-2">
-                            <span class="text-[10px] text-orange-400 font-mono uppercase block">Natural NLP Engine</span>
-                            <p class="text-xs text-slate-400">사용자가 입력하는 단문 형태소 분석을 기반으로 테스크 카테고리를 유추하고 알맞은 태그 보드에 매핑합니다.</p>
+                        <div class="p-5 bg-slate-50 dark:bg-dark-950 rounded-xl border border-slate-200 dark:border-dark-800 space-y-2">
+                            <span class="text-[10px] text-orange-600 dark:text-orange-400 font-mono uppercase block">Natural NLP Engine</span>
+                            <p class="text-xs text-slate-600 dark:text-slate-400">사용자가 입력하는 단문 형태소 분석을 기반으로 테스크 카테고리를 유추하고 알맞은 태그 보드에 매핑합니다.</p>
                         </div>
                     </div>
 
-                    <div class="p-4 bg-orange-950/20 border border-orange-900/40 rounded-xl">
-                        <h4 class="text-xs font-bold text-orange-400 uppercase tracking-widest block mb-2"><i class="fa-solid fa-medal mr-1.5"></i> Academic Recognition</h4>
-                        <p class="text-xs text-slate-400">
+                    <div class="p-4 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/40 rounded-xl">
+                        <h4 class="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-widest block mb-2"><i class="fa-solid fa-medal mr-1.5"></i> Academic Recognition</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">
                             연구 우수성과 고유한 UI를 높이 인정받아 <strong>2024 SW중심대학 연합 SW FESTIVAL 최우수상</strong>을 수상했으며, 설계 아키텍처는 보강 연구를 거쳐 정식으로 <strong>KCI 등재지에 단독 수록</strong>되었습니다.
                         </p>
                     </div>
@@ -816,24 +876,24 @@
             markdown: `
                 <div class="space-y-6">
                     <div>
-                        <h3 class="text-sm font-extrabold text-white tracking-wider uppercase mb-3"><i class="fa-solid fa-circle-check text-emerald-500 mr-1.5"></i> Project Goal</h3>
-                        <p class="text-slate-400">
-                            일반적인 수거함이 페트병과 플라스틱만을 분류하는 것과 달리, <strong class="text-white">Ecosmetic Bin</strong>은 잔여 오염물이 남아 있어 분류가 곤란한 유리 화장품 공병, 플라스틱 공병, 금속 스프레이캔 등을 IoT 임베디드 카메라를 통해 식별하여 완전 분리 수거합니다.
+                        <h3 class="text-sm font-extrabold text-slate-800 dark:text-white tracking-wider uppercase mb-3"><i class="fa-solid fa-circle-check text-emerald-500 mr-1.5"></i> Project Goal</h3>
+                        <p class="text-slate-600 dark:text-slate-400">
+                            일반적인 수거함이 페트병과 플라스틱만을 분류하는 것과 달리, <strong class="text-slate-900 dark:text-white">Ecosmetic Bin</strong>은 잔여 오염물이 남아 있어 분류가 곤란한 유리 화장품 공병, 플라스틱 공병, 금속 스프레이캔 등을 IoT 임베디드 카메라를 통해 식별하여 완전 분리 수거합니다.
                         </p>
                     </div>
 
-                    <div class="p-5 bg-dark-950 rounded-xl border border-dark-800 space-y-3">
-                        <h4 class="text-xs font-bold text-white uppercase tracking-wider font-mono"><i class="fa-solid fa-microchip text-emerald-400 mr-1.5"></i> Raspberry Pi Core</h4>
-                        <ul class="list-disc list-inside text-xs space-y-2 text-slate-400">
-                            <li><strong class="text-white">Computer Vision Model:</strong> OpenCV 이미지 가공 알고리즘을 사용해 밝기 및 형광 반사광 노이즈를 제거한 뒤, 경량화된 TensorFlow Lite 모델에 피딩해 90% 이상의 고정밀 정확도로 재질을 분석합니다.</li>
-                            <li><strong class="text-white">Physical Gate Integration:</strong> 물체가 정확히 식별되면 모터가 회전하여 수거함 내 각 카테고리별 분할 트랙으로 유도 투하합니다.</li>
-                            <li><strong class="text-white">Android App Syncing:</strong> 수거 이력을 모바일(Java Android) 클라이언트와 MySQL 실시간 백엔드로 원격 전송하여 포인트를 정립하는 스마트 IoT 기능을 통합 지원합니다.</li>
+                    <div class="p-5 bg-slate-50 dark:bg-dark-950 rounded-xl border border-slate-200 dark:border-dark-800 space-y-3">
+                        <h4 class="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider font-mono"><i class="fa-solid fa-microchip text-emerald-600 dark:text-emerald-400 mr-1.5"></i> Raspberry Pi Core</h4>
+                        <ul class="list-disc list-inside text-xs space-y-2 text-slate-600 dark:text-slate-400">
+                            <li><strong class="text-slate-900 dark:text-white">Computer Vision Model:</strong> OpenCV 이미지 가공 알고리즘을 사용해 밝기 및 형광 반사광 노이즈를 제거한 뒤, 경량화된 TensorFlow Lite 모델에 피딩해 90% 이상의 고정밀 정확도로 재질을 분석합니다.</li>
+                            <li><strong class="text-slate-900 dark:text-white">Physical Gate Integration:</strong> 물체가 정확히 식별되면 모터가 회전하여 수거함 내 각 카테고리별 분할 트랙으로 유도 투하합니다.</li>
+                            <li><strong class="text-slate-900 dark:text-white">Android App Syncing:</strong> 수거 이력을 모바일(Java Android) 클라이언트와 MySQL 실시간 백엔드로 원격 전송하여 포인트를 정립하는 스마트 IoT 기능을 통합 지원합니다.</li>
                         </ul>
                     </div>
 
-                    <div class="p-4 bg-emerald-950/20 border border-emerald-900/40 rounded-xl">
-                        <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-widest block mb-2"><i class="fa-solid fa-crown mr-1.5"></i> Major Award</h4>
-                        <p class="text-xs text-slate-400">
+                    <div class="p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 rounded-xl">
+                        <h4 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest block mb-2"><i class="fa-solid fa-crown mr-1.5"></i> Major Award</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">
                             친환경 에코 테크 트랙의 가치와 하드웨어 통합 완성도를 증명해 <strong>2024 시스코 이노베이션 챌린지 장려상</strong>을 수상하는 영예를 안았습니다.
                         </p>
                     </div>
@@ -848,27 +908,27 @@
             markdown: `
                 <div class="space-y-6">
                     <div>
-                        <h3 class="text-sm font-extrabold text-white tracking-wider uppercase mb-3"><i class="fa-solid fa-circle-check text-cyan-500 mr-1.5"></i> Project Core</h3>
-                        <p class="text-slate-400">
+                        <h3 class="text-sm font-extrabold text-slate-800 dark:text-white tracking-wider uppercase mb-3"><i class="fa-solid fa-circle-check text-cyan-500 mr-1.5"></i> Project Core</h3>
+                        <p class="text-slate-600 dark:text-slate-400">
                             본 프로젝트는 회의 세션 내 다중 디스플레이 장치의 신호를 단일 물리 디바이스 환경에서 효율적으로 멀티플렉싱하고 지연 시간을 획기적으로 낮추는 시스템 소프트웨어 아키텍처에 중점을 둡니다.
                         </p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="p-5 bg-dark-950 rounded-xl border border-dark-800 space-y-2">
-                            <span class="text-[10px] text-cyan-400 font-mono uppercase block">Low-Latency Rendering</span>
-                            <p class="text-xs text-slate-400">네이티브 C/C++ 소켓 통신을 이용해 스크린 픽셀 메모리 버퍼를 FFmpeg API 단에서 하드웨어 디코딩 가속 처리하는 드라이버 가공 기법 적용.</p>
+                        <div class="p-5 bg-slate-50 dark:bg-dark-950 rounded-xl border border-slate-200 dark:border-dark-800 space-y-2">
+                            <span class="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono uppercase block">Low-Latency Rendering</span>
+                            <p class="text-xs text-slate-600 dark:text-slate-400">네이티브 C/C++ 소켓 통신을 이용해 스크린 픽셀 메모리 버퍼를 FFmpeg API 단에서 하드웨어 디코딩 가속 처리하는 드라이버 가공 기법 적용.</p>
                         </div>
-                        <div class="p-5 bg-dark-950 rounded-xl border border-dark-800 space-y-2">
-                            <span class="text-[10px] text-cyan-400 font-mono uppercase block">Multi-Presenter Multiplexing</span>
-                            <p class="text-xs text-slate-400">동시에 공유되는 다중 신호를 우선순위 스케줄링 큐를 통해 지연 시간의 불규칙성(Jitter) 없이 고정 프레임 전송 보장.</p>
+                        <div class="p-5 bg-slate-50 dark:bg-dark-950 rounded-xl border border-slate-200 dark:border-dark-800 space-y-2">
+                            <span class="text-[10px] text-cyan-600 dark:text-cyan-400 font-mono uppercase block">Multi-Presenter Multiplexing</span>
+                            <p class="text-xs text-slate-600 dark:text-slate-400">동시에 공유되는 다중 신호를 우선순위 스케줄링 큐를 통해 지연 시간의 불규칙성(Jitter) 없이 고정 프레임 전송 보장.</p>
                         </div>
                     </div>
 
-                    <div class="p-4 bg-cyan-950/20 border border-cyan-900/40 rounded-xl">
-                        <h4 class="text-xs font-bold text-cyan-400 uppercase tracking-widest block mb-2"><i class="fa-solid fa-award mr-1.5"></i> Academic Publications & Patent</h4>
-                        <p class="text-xs text-slate-400">
-                            해당 저지연 동시 공유 프레임워크 연구는 <strong>KCI 등재지에 정식 게재</strong>되었으며, 관련 설계 특허인 <strong class="text-white">"로컬 네트워크 기반의 화면 공유 장치 및 방법(2025.12.31 출원)"</strong> 등록을 완수해 지적 지식재산 가치를 획득했습니다.
+                    <div class="p-4 bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-900/40 rounded-xl">
+                        <h4 class="text-xs font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-widest block mb-2"><i class="fa-solid fa-award mr-1.5"></i> Academic Publications & Patent</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">
+                            해당 저지연 동시 공유 프레임워크 연구는 <strong>KCI 등재지에 정식 게재</strong>되었으며, 관련 설계 특허인 <strong class="text-slate-900 dark:text-white">"로컬 네트워크 기반의 화면 공유 장치 및 방법(2025.12.31 출원)"</strong> 등록을 완수해 지적 지식재산 가치를 획득했습니다.
                         </p>
                     </div>
                 </div>
@@ -879,7 +939,47 @@
     window.addEventListener('load', () => {
         // Compute SSAFY progress days dynamic value
         updateSsafyCounter();
+        // Initialize Theme Mode controls
+        initTheme();
     });
+
+    function initTheme() {
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeToggleIcon = document.getElementById('theme-toggle-icon');
+
+        function updateIcon() {
+            if (document.documentElement.classList.contains('dark')) {
+                themeToggleIcon.className = "fa-solid fa-sun text-yellow-400";
+                themeToggleBtn.title = "라이트 모드로 전환";
+            } else {
+                themeToggleIcon.className = "fa-solid fa-moon text-slate-700";
+                themeToggleBtn.title = "다크 모드로 전환";
+            }
+        }
+
+        updateIcon();
+
+        themeToggleBtn.addEventListener('click', function() {
+            if (localStorage.getItem('color-theme')) {
+                if (localStorage.getItem('color-theme') === 'light') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                }
+            } else {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
+            }
+            updateIcon();
+        });
+    }
 
     function enterPortfolio() {
         document.getElementById('landing-view').classList.add('hidden');
@@ -902,7 +1002,7 @@
         document.getElementById('ssafy-counter').innerText = displayVal;
     }
 
-    // Switch between Achievements categories
+    // Switch between Achievements categories adaptively across themes
     function switchAchievementTab(categoryName) {
         // Reset and hide all panels
         document.querySelectorAll('.achievement-panel').forEach(panel => {
@@ -911,7 +1011,7 @@
         
         // Remove active styles from tab buttons
         document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.className = "tab-btn flex-1 py-3 rounded-lg text-[11px] font-extrabold tracking-wider uppercase transition-all text-slate-400 hover:text-white flex items-center justify-center gap-2";
+            btn.className = "tab-btn flex-1 py-3 rounded-lg text-[11px] font-extrabold tracking-wider uppercase transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white flex items-center justify-center gap-2";
         });
 
         // Show targets
@@ -919,15 +1019,13 @@
         
         // Highlight Active Tab
         const activeTab = document.getElementById(`tab-${categoryName}`);
-        activeTab.className = "tab-btn flex-1 py-3 rounded-lg text-[11px] font-extrabold tracking-wider uppercase transition-all text-white bg-dark-800 border border-dark-700/60 shadow-md flex items-center justify-center gap-2";
+        activeTab.className = "tab-btn flex-1 py-3 rounded-lg text-[11px] font-extrabold tracking-wider uppercase transition-all text-slate-800 bg-white border border-slate-300/80 shadow-sm dark:text-white dark:bg-dark-800 dark:border-dark-700/60 dark:shadow-md flex items-center justify-center gap-2";
     }
 
     // SPA Router Navigation
     function navigateTo(viewId) {
         const mainView = document.getElementById('portfolio-main-view');
         const detailView = document.getElementById('project-detail-view');
-
-        //window.location.hash = viewId;
 
         if (viewId === 'portfolio-main-view') {
             detailView.classList.add('hidden');
